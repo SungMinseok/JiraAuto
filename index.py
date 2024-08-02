@@ -20,6 +20,7 @@ class BugReportApp(QWidget):
         layout = QVBoxLayout()
 
 
+        
         # Other QLineEdits
         self.other_fields = {}
         for field_name in ["summary", "reviewer", "branch", "build", "fixversion", "component", "label"]:
@@ -51,8 +52,6 @@ class BugReportApp(QWidget):
         layout.addWidget(QLabel('Repro Rate'))
         layout.addWidget(self.repro_rate)
 
-
-        
         # Steps QTextEdit
         self.steps = QTextEdit()
         layout.addWidget(QLabel('Steps'))
@@ -63,10 +62,15 @@ class BugReportApp(QWidget):
         layout.addWidget(QLabel('Description'))
         layout.addWidget(self.description)
 
-        # Save Button
-        self.save_btn = QPushButton('Save')
-        self.save_btn.clicked.connect(self.saveSettings)
-        layout.addWidget(self.save_btn)
+        # # Save Button
+        # self.save_btn = QPushButton('Save')
+        # self.save_btn.clicked.connect(self.saveSettings)
+        # layout.addWidget(self.save_btn)
+
+        # Generate Button
+        self.generate_btn = QPushButton('Auto Generate')
+        self.generate_btn.clicked.connect(self.generate_description)
+        layout.addWidget(self.generate_btn)
 
         # Execute Button
         self.execute_btn = QPushButton('Execute')
@@ -77,6 +81,27 @@ class BugReportApp(QWidget):
         self.loadSettings()
         self.setWindowTitle('Bug Report')
         self.show()
+
+    def generate_description(self):
+        main_text = self.other_fields['summary'].text()
+
+        result_text = main_text.replace('다른 현상', '동일해야 합니다.')
+        result_text = result_text.replace('하지 않는 현상', '해야 합니다.')
+        result_text = result_text.replace('되는 현상', '되지 않아야 합니다.')
+        result_text = result_text.replace('되지 않는 현상', '되어야 합니다.')
+        result_text = result_text.replace('없는 현상', '있어야 합니다.')
+        result_text = result_text.replace('있는 현상', '있지 않아야 합니다.')
+
+        after_desc = f'*Observed(관찰 결과):*\n\n\
+ * {main_text}을 확인합니다.\n\n\
+*Video(영상):*\n\n\
+ * 영상을 첨부 중입니다.\n\n\
+*Expected(기대 결과):*\n\n\
+ * {result_text}\n\n\
+*Note(참고):*\n\n\
+ * 참고사항을 작성 중입니다.'
+        self.description.setText(after_desc)
+
 
     def saveSettings(self):
         settings = {
