@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
@@ -7,6 +8,10 @@ import threading
 # import jira2 모듈 (jira2 모듈을 설치하고 사용할 수 있는지 확인 필요)
 import jira2
 
+dir_preset = 'preset'
+if not os.path.exists('dir_preset'):
+    os.makedirs('dir_preset')
+
 class BugReportApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -14,13 +19,44 @@ class BugReportApp(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.settings = QSettings('settings.json', QSettings.NativeFormat)
+        #self.settings = QSettings('settings.json', QSettings.NativeFormat)
         #self.settings_file = 'settings.json'
 
         layout = QVBoxLayout()
 
 
+        # Priority Dropdown
+        preset_layout = QHBoxLayout()
+        self.preset = QComboBox()
+        layout.addWidget(QLabel('Preset'))
+        #layout.addWidget(self.preset)
+        preset_layout.addWidget(self.preset)
+
+        # Refresh and Apply Preset Buttons
+        self.refresh_preset_btn = QPushButton('🔄')
+        self.refresh_preset_btn.setFixedWidth(25)
+        self.refresh_preset_btn.clicked.connect(self.refreshPresets)
+        preset_layout.addWidget(self.refresh_preset_btn)
+
+        self.apply_preset_btn = QPushButton('📁')
+        self.apply_preset_btn.setFixedWidth(25)
+        self.apply_preset_btn.clicked.connect(self.applyPreset)
+        preset_layout.addWidget(self.apply_preset_btn)
+
+        layout.addLayout(preset_layout)
+
+        add_preset_layout = QHBoxLayout()
+
+        self.add_preset_line = QLineEdit()
+        add_preset_layout.addWidget(self.add_preset_line)
         
+        self.save_preset_btn = QPushButton('💾')
+        self.save_preset_btn.setFixedWidth(25)
+        self.save_preset_btn.clicked.connect(self.savePreset)
+        add_preset_layout.addWidget(self.save_preset_btn)
+
+        layout.addLayout(add_preset_layout)
+
         # Other QLineEdits
         self.other_fields = {}
         for field_name in ["summary", "reviewer", "branch", "build", "fixversion", "component", "label"]:
@@ -103,7 +139,7 @@ class BugReportApp(QWidget):
         self.description.setText(after_desc)
 
 
-    def saveSettings(self):
+    def saveSettings(self, filename=f'{dir_preset}/settings.json'):
         settings = {
             'priority': self.priority.currentText(),
             'severity': self.severity.currentText(),
@@ -116,14 +152,14 @@ class BugReportApp(QWidget):
         for field_name in self.other_fields:
             settings[field_name] = self.other_fields[field_name].text()
 
-        with open('settings.json', 'w') as file:
+        with open(f'{dir_preset}/{filename}', 'w') as file:
             json.dump(settings, file, indent=4)
 
-    def loadSettings(self):
+    def loadSettings(self, filename=f'{dir_preset}/settings.json'):
         try:
-            with open('settings.json', 'r') as file:
+            with open(f'{dir_preset}/{filename}', 'r') as file:
                 settings = json.load(file)
-            
+
             self.priority.setCurrentText(settings.get('priority', 'Blocker'))
             self.severity.setCurrentText(settings.get('severity', '1 - Critical'))
             self.prevalence.setCurrentText(settings.get('prevalence', '1 - All users'))
@@ -134,7 +170,6 @@ class BugReportApp(QWidget):
             for field_name in self.other_fields:
                 self.other_fields[field_name].setText(settings.get(field_name, ''))
         except FileNotFoundError:
-            # File does not exist, default settings will be used
             pass
 
     def execute(self):
@@ -162,6 +197,24 @@ class BugReportApp(QWidget):
     def closeEvent(self, event):
         self.saveSettings()
         event.accept()
+
+    def refreshPresets(self):
+        self.preset.clear()
+        dir_preset = 'preset'  # 디렉토리 경로 설정
+        preset_files = [f for f in os.listdir(dir_preset) if f.endswith('.json')]
+        preset_files.sort(key=lambda f: os.path.getmtime(os.path.join(dir_preset, f)), reverse=True)
+        self.preset.addItems(preset_files)
+
+    def applyPreset(self):
+        selected_preset = self.preset.currentText()
+        if selected_preset:
+            self.loadSettings(selected_preset)
+    def savePreset(self):
+        new_preset = self.add_preset_line.text()
+        if new_preset:
+            if '.json' not in new_preset :
+                new_preset = f'{new_preset}.json'
+            self.saveSettings(new_preset)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
