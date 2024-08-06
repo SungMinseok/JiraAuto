@@ -3,3 +3,4 @@
 /backup
 /settings.json
 /__pycache__
+*.json
