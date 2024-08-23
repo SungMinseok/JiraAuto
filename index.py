@@ -124,7 +124,9 @@ class BugReportApp(QWidget):
         result_text = main_text.replace('다른 현상', '동일해야 합니다.')
         result_text = result_text.replace('하지 않는 현상', '해야 합니다.')
         result_text = result_text.replace('되는 현상', '되지 않아야 합니다.')
+        result_text = result_text.replace('하는 현상', '하지 않아야 합니다.')
         result_text = result_text.replace('되지 않는 현상', '되어야 합니다.')
+        result_text = result_text.replace('되지 않은 현상', '되어야 합니다.')
         result_text = result_text.replace('없는 현상', '있어야 합니다.')
         result_text = result_text.replace('있는 현상', '있지 않아야 합니다.')
 
