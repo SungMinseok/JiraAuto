@@ -38,7 +38,8 @@ class BugReportApp(QWidget):
         self.refresh_preset_btn.clicked.connect(self.refreshPresets)
         preset_layout.addWidget(self.refresh_preset_btn)
 
-        self.apply_preset_btn = QPushButton('📁')
+        self.apply_preset_btn = QPushButton('✅')
+        self.apply_preset_btn.setToolTip('프리셋 적용')
         self.apply_preset_btn.setFixedWidth(25)
         self.apply_preset_btn.clicked.connect(self.applyPreset)
         preset_layout.addWidget(self.apply_preset_btn)
@@ -61,32 +62,56 @@ class BugReportApp(QWidget):
         self.other_fields = {}
         for field_name in ["summary", "reviewer", "branch", "build", "fixversion", "component", "label"]:
             self.other_fields[field_name] = QLineEdit()
-            layout.addWidget(QLabel(field_name))
-            layout.addWidget(self.other_fields[field_name])
+            if field_name not in ["summary"] :
+                temp_layout = QHBoxLayout()
+                temp_label = QLabel(field_name)
+                temp_label.setFixedWidth(70)
+                temp_layout.addWidget(temp_label)
+                temp_layout.addWidget(self.other_fields[field_name])
+                layout.addLayout(temp_layout)
+            else:
+                layout.addWidget(QLabel(field_name))
+                layout.addWidget(self.other_fields[field_name])
 
         # Priority Dropdown
         self.priority = QComboBox()
         self.priority.addItems(["Blocker", "Critical", "High", "Medium","Low"])
-        layout.addWidget(QLabel('Priority'))
-        layout.addWidget(self.priority)
+        temp_layout = QHBoxLayout()
+        temp_label = QLabel('Priority')
+        temp_label.setFixedWidth(70)
+        temp_layout.addWidget(temp_label)
+        temp_layout.addWidget(self.priority)
+        layout.addLayout(temp_layout)
 
         # Severity Dropdown
         self.severity = QComboBox()
         self.severity.addItems(["1 - Critical", "2 - Major", "3 - Minor"])
-        layout.addWidget(QLabel('Severity'))
-        layout.addWidget(self.severity)
+        temp_layout = QHBoxLayout()
+        temp_label = QLabel('severity')
+        temp_label.setFixedWidth(70)
+        temp_layout.addWidget(temp_label)
+        temp_layout.addWidget(self.severity)
+        layout.addLayout(temp_layout)
 
         # Prevalence Dropdown
         self.prevalence = QComboBox()
         self.prevalence.addItems(["1 - All users", "2 - The majority of users", "3 - Half Of users", "4 - Almost no users", "5 - Encountered by single user"])
-        layout.addWidget(QLabel('Prevalence'))
-        layout.addWidget(self.prevalence)
+        temp_layout = QHBoxLayout()
+        temp_label = QLabel('prevalence')
+        temp_label.setFixedWidth(70)
+        temp_layout.addWidget(temp_label)
+        temp_layout.addWidget(self.prevalence)
+        layout.addLayout(temp_layout)
 
         # Repro Rate Dropdown
         self.repro_rate = QComboBox()
         self.repro_rate.addItems(["1 - 100% reproducible", "2 - Most times", "3 - Approximately half the time", "4 - Rare", "5 - Seen Once"])
-        layout.addWidget(QLabel('Repro Rate'))
-        layout.addWidget(self.repro_rate)
+        temp_layout = QHBoxLayout()
+        temp_label = QLabel('repro_rate')
+        temp_label.setFixedWidth(70)
+        temp_layout.addWidget(temp_label)
+        temp_layout.addWidget(self.repro_rate)
+        layout.addLayout(temp_layout)
 
         # Steps QTextEdit
         self.steps = QTextEdit()
