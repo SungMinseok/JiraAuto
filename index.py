@@ -2,15 +2,15 @@ import os
 import sys
 import json
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-                             QLineEdit, QTextEdit, QComboBox, QPushButton)
-from PyQt5.QtCore import QSettings
+                             QLineEdit, QTextEdit, QComboBox, QPushButton,QMessageBox)
+from PyQt5.QtCore import QSettings, Qt
 import threading
 # import jira2 모듈 (jira2 모듈을 설치하고 사용할 수 있는지 확인 필요)
 import jira2
 
 dir_preset = 'preset'
-if not os.path.exists('dir_preset'):
-    os.makedirs('dir_preset')
+if not os.path.exists(dir_preset):
+    os.makedirs(dir_preset)
 
 class BugReportApp(QWidget):
     def __init__(self):
@@ -68,6 +68,16 @@ class BugReportApp(QWidget):
                 temp_label.setFixedWidth(70)
                 temp_layout.addWidget(temp_label)
                 temp_layout.addWidget(self.other_fields[field_name])
+                if field_name in ["build"] :
+                                
+                    self.load_buildname_btn = QPushButton('🔄')
+                    self.load_buildname_btn.setFixedWidth(25)
+                    self.load_buildname_btn.clicked.connect(lambda: self.load_text_file_all('buildname.txt', self.other_fields["build"]))
+                    temp_layout.addWidget(self.load_buildname_btn)
+                    self.save_buildname_btn = QPushButton('💾')
+                    self.save_buildname_btn.setFixedWidth(25)
+                    self.save_buildname_btn.clicked.connect(lambda : self.create_text_file('buildname.txt', self.other_fields["build"].text()))
+                    temp_layout.addWidget(self.save_buildname_btn)
                 layout.addLayout(temp_layout)
             else:
                 layout.addWidget(QLabel(field_name))
@@ -154,6 +164,7 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('되지 않은 현상', '되어야 합니다.')
         result_text = result_text.replace('없는 현상', '있어야 합니다.')
         result_text = result_text.replace('있는 현상', '있지 않아야 합니다.')
+        result_text = result_text.replace('지는 현상', '지지 않아야 합니다.')
 
         after_desc = f'*Observed(관찰 결과):*\n\n\
  * {main_text}을 확인합니다.\n\n\
@@ -242,6 +253,38 @@ class BugReportApp(QWidget):
             if '.json' not in new_preset :
                 new_preset = f'{new_preset}.json'
             self.saveSettings(new_preset)
+
+    
+
+    def create_text_file(self, filename, content):
+        with open(filename, 'w') as file:
+            file.write(content)
+        print(f"File '{filename}' created successfully.")
+
+    def load_text_file_all(self, filename, target = None):
+        with open(filename, 'r') as file:
+            content = file.read()
+        if target != None :
+            target.setText(content)
+    
+    def load_text_file_line_by_line(self, filename, target = None):
+        with open(filename, 'r') as file:
+            content = file.readlines()
+        return content
+    
+    
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_F12:
+            self.debug_function()  # Call the function to execute on F12 press
+
+    def debug_function(self):
+        #self.show_file_count()
+        # Replace this with whatever you want to happen when F12 is pressed
+        QMessageBox.information(self, 'Debugging', 'F12 pressed: Debugging function executed.')
+
+        #self.zip_folder(self.input_box2.text(),self.combo_box.currentText(),'WindowsServer')
+        pass
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
