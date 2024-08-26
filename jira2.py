@@ -25,18 +25,6 @@ def start_driver():
 
 def create_issue(summary, reviewer, branch, build, fixversion, component, label, priority, severity, prevalence, repro_rate, steps, description):
     driver = start_driver()
-    # driver_name = fr"C:\chromedriver-win64\chromedriver.exe"
-    # subprocess.Popen(fr'C:\Program Files\Google\Chrome\Application\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\ChromeTEMP')
-
-    # chrome_options = Options()
-    # chrome_options.debugger_address = "127.0.0.1:9222"
-    # #chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
-
-    # try:
-    #     driver = webdriver.Chrome(driver_name, options=chrome_options)
-    # except:
-    #     chromedriver_autoinstaller.install(True)
-    #     driver = webdriver.Chrome( options=chrome_options)
 
     driver.implicitly_wait(10)
     driver.get("https://jira.krafton.com/secure/Dashboard.jspa")
