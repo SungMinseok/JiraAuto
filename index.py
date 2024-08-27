@@ -280,8 +280,8 @@ class BugReportApp(QWidget):
     def debug_function(self):
         #self.show_file_count()
         # Replace this with whatever you want to happen when F12 is pressed
-        QMessageBox.information(self, 'Debugging', 'F12 pressed: Debugging function executed.')
-
+        #QMessageBox.information(self, 'Debugging', 'F12 pressed: Debugging function executed.')
+        jira2.aws_upload_custom(44)
         #self.zip_folder(self.input_box2.text(),self.combo_box.currentText(),'WindowsServer')
         pass
 
