@@ -9,7 +9,10 @@ import os
 import jira2
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-def aws_upload_custom(driver, revision):
+
+
+
+def aws_upload_custom(driver, revision, zip_path):
     if driver == None :
 
         driver = jira2.start_driver()
@@ -25,7 +28,6 @@ def aws_upload_custom(driver, revision):
         except:
             print('pass login...')
             pass
-    zip_path = fr'C:\mybuild\CompileBuild_DEV_game_SEL114483_r157023\WindowsServer.zip'
 
     driver.implicitly_wait(10)
     driver.find_element(By.XPATH,"/html/body/div[1]/div[3]/div/div[2]/ul/li[3]").click()
@@ -153,6 +155,8 @@ if __name__ == '__main__':
         print('pass login...')
         pass
 
-    aws_update_custom(driver,"157023_a")
-    #aws_upload_custom(driver,"157023_a")
+    zip_path = fr'C:\mybuild\CompileBuild_DEV_game_SEL114483_158662\WindowsServer.zip'
+
+    aws_upload_custom(driver,"157023_a",zip_path)
+    aws_update_custom(driver,"158662")
     #aws_stop()
