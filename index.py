@@ -19,6 +19,71 @@ class BugReportApp(QWidget):
         self.initUI()
 
     def initUI(self):
+        self.setStyleSheet("""
+    QWidget {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        /*border-radius: 10px;*/
+        /*border: 1px solid #333333;*/
+        font-family: 'Malgun Gothic', sans-serif;
+        font-size: 11pt;
+        font-weight: bold
+    }
+
+    QLineEdit {
+        background-color: #333333;
+        border: 1px solid #555555;
+        padding: 5px;
+        border-radius: 5px;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+
+    QPushButton {
+        background-color: #444444;
+        border: 1px solid #666666;
+        border-radius: 5px;
+        padding: 5px;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+
+    QPushButton:hover {
+        background-color: #555555;
+    }
+
+    QPushButton:pressed {
+        background-color: #666666;
+    }
+
+    QComboBox {
+        background-color: #333333;
+        border: 1px solid #555555;
+        padding: 5px;
+        border-radius: 5px;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+
+    QCheckBox {
+        background-color: transparent;
+        border: none;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+
+    QProgressDialog {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #333333;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+
+    QTimeEdit {
+        background-color: #333333;
+        border: 1px solid #555555;
+        padding: 5px;
+        border-radius: 5px;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+""")
         #self.settings = QSettings('settings.json', QSettings.NativeFormat)
         #self.settings_file = 'settings.json'
 
@@ -65,7 +130,7 @@ class BugReportApp(QWidget):
             if field_name not in ["summary"] :
                 temp_layout = QHBoxLayout()
                 temp_label = QLabel(field_name)
-                temp_label.setFixedWidth(70)
+                temp_label.setFixedWidth(80)
                 temp_layout.addWidget(temp_label)
                 temp_layout.addWidget(self.other_fields[field_name])
                 if field_name in ["build"] :
@@ -88,7 +153,7 @@ class BugReportApp(QWidget):
         self.priority.addItems(["Blocker", "Critical", "High", "Medium","Low"])
         temp_layout = QHBoxLayout()
         temp_label = QLabel('Priority')
-        temp_label.setFixedWidth(70)
+        temp_label.setFixedWidth(80)
         temp_layout.addWidget(temp_label)
         temp_layout.addWidget(self.priority)
         layout.addLayout(temp_layout)
@@ -98,7 +163,7 @@ class BugReportApp(QWidget):
         self.severity.addItems(["1 - Critical", "2 - Major", "3 - Minor"])
         temp_layout = QHBoxLayout()
         temp_label = QLabel('severity')
-        temp_label.setFixedWidth(70)
+        temp_label.setFixedWidth(80)
         temp_layout.addWidget(temp_label)
         temp_layout.addWidget(self.severity)
         layout.addLayout(temp_layout)
@@ -108,7 +173,7 @@ class BugReportApp(QWidget):
         self.prevalence.addItems(["1 - All users", "2 - The majority of users", "3 - Half Of users", "4 - Almost no users", "5 - Encountered by single user"])
         temp_layout = QHBoxLayout()
         temp_label = QLabel('prevalence')
-        temp_label.setFixedWidth(70)
+        temp_label.setFixedWidth(80)
         temp_layout.addWidget(temp_label)
         temp_layout.addWidget(self.prevalence)
         layout.addLayout(temp_layout)
@@ -118,7 +183,7 @@ class BugReportApp(QWidget):
         self.repro_rate.addItems(["1 - 100% reproducible", "2 - Most times", "3 - Approximately half the time", "4 - Rare", "5 - Seen Once"])
         temp_layout = QHBoxLayout()
         temp_label = QLabel('repro_rate')
-        temp_label.setFixedWidth(70)
+        temp_label.setFixedWidth(80)
         temp_layout.addWidget(temp_label)
         temp_layout.addWidget(self.repro_rate)
         layout.addLayout(temp_layout)
@@ -139,6 +204,9 @@ class BugReportApp(QWidget):
         # layout.addWidget(self.save_btn)
 
         # Generate Button
+        self.generate_option = QComboBox()
+        self.generate_option.addItems(["기본값","크래쉬"])
+        
         self.generate_btn = QPushButton('Auto Generate')
         self.generate_btn.clicked.connect(self.generate_description)
         layout.addWidget(self.generate_btn)
