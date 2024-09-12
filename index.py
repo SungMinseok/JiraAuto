@@ -3,7 +3,7 @@ import sys
 import json
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QLineEdit, QTextEdit, QComboBox, QPushButton,QMessageBox)
-from PyQt5.QtCore import QSettings, Qt
+from PyQt5.QtCore import QSettings, Qt, QPoint
 import threading
 # import jira2 모듈 (jira2 모듈을 설치하고 사용할 수 있는지 확인 필요)
 import jira2
@@ -19,30 +19,120 @@ class BugReportApp(QWidget):
         self.initUI()
 
     def initUI(self):
+        #self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
+        layout = QVBoxLayout()
+        # 커스텀 제목 표시줄
+        # self.titleBar = QWidget(self)
+        # self.titleBar.setStyleSheet("""
+        #     QWidget {
+        #         background-color: #222222;
+        #         color: #ffffff;
+        #         font-family: 'Malgun Gothic', sans-serif;
+        #         font-size: 12pt;
+        #         font-weight: bold;
+        #         border-radius: 15px;  # 전체 애플리케이션 창에 둥근 모서리 적용
+        #     }
+        # """)
+
+        titleBarLayout = QHBoxLayout()
+        self.titleLabel = QLabel("Jira ttalkkag2")
+        self.minimizeButton = QPushButton("_")
+        self.minimizeButton.setFixedSize(30,30)
+        #self.maximizeButton = QPushButton("[]")
+        self.closeButton = QPushButton("X")
+        self.closeButton.setFixedSize(30,30)
+        # 버튼 스타일 적용
+        buttonStyle = """
+            QPushButton {
+                background-color: #333333;
+                border: 1px solid #555555;
+                padding: 5px;
+                border-radius: 5px;
+                color: #ffffff;
+                font-family: 'Malgun Gothic', sans-serif;
+            }
+        """
+        self.minimizeButton.setStyleSheet(buttonStyle)
+        #self.maximizeButton.setStyleSheet(buttonStyle)
+        self.closeButton.setStyleSheet(buttonStyle)
+
+        titleBarLayout.addWidget(self.titleLabel)
+        titleBarLayout.addStretch()
+        titleBarLayout.addWidget(self.minimizeButton)
+        #titleBarLayout.addWidget(self.maximizeButton)
+        titleBarLayout.addWidget(self.closeButton)
+        #self.titleBar.setLayout(titleBarLayout)
+
+        # 메인 레이아웃
+        self.mainLayout = QVBoxLayout()
+        #self.mainLayout.addWidget(self.titleBar)
+        self.mainLayout.addStretch()
+
+        layout.addLayout(self.mainLayout)
+        #self.setLayout(self.mainLayout)
+        
+        # self.setStyleSheet("""
+        #     QWidget {
+        #         background-color: #1a1a1a;
+        #         color: #ffffff;
+        #         font-family: 'Malgun Gothic', sans-serif;
+        #         font-size: 11pt;
+        #         font-weight: bold;
+        #     }
+
+        #     QLineEdit {
+        #         background-color: #333333;
+        #         border: 1px solid #555555;
+        #         padding: 5px;
+        #         border-radius: 5px;
+        #         font-family: 'Malgun Gothic', sans-serif;
+        #     }
+        # """)
+
+        self.setMinimumSize(400, 300)
+
+        # 버튼 기능 연결
+        self.minimizeButton.clicked.connect(self.showMinimized)
+        # self.maximizeButton.clicked.connect(self.toggleMaximized)
+        self.closeButton.clicked.connect(self.closeEvent)
+
+        self.isMaximized = False
+
+        self.oldPos = self.pos()
+        
+        
         self.setStyleSheet("""
     QWidget {
         background-color: #1a1a1a;
         color: #ffffff;
-        /*border-radius: 10px;*/
+        /*border-radius: 30px;*/
         /*border: 1px solid #333333;*/
         font-family: 'Malgun Gothic', sans-serif;
         font-size: 11pt;
         font-weight: bold
+                           
     }
 
     QLineEdit {
         background-color: #333333;
         border: 1px solid #555555;
-        padding: 5px;
-        border-radius: 5px;
+        /*padding: 5px;*/
+        /*border-radius: 5px;*/
         font-family: 'Malgun Gothic', sans-serif;
     }
 
+    QTextEdit {
+        background-color: #333333;
+        border: 1px solid #555555;
+        /*padding: 5px;*/
+        /*border-radius: 5px;*/
+        font-family: 'Malgun Gothic', sans-serif;
+    }
     QPushButton {
         background-color: #444444;
         border: 1px solid #666666;
-        border-radius: 5px;
-        padding: 5px;
+        /*padding: 5px;*/
+        /*border-radius: 5px;*/
         font-family: 'Malgun Gothic', sans-serif;
     }
 
@@ -57,8 +147,8 @@ class BugReportApp(QWidget):
     QComboBox {
         background-color: #333333;
         border: 1px solid #555555;
-        padding: 5px;
-        border-radius: 5px;
+        /*padding: 5px;*/
+        /*border-radius: 5px;*/
         font-family: 'Malgun Gothic', sans-serif;
     }
 
@@ -79,15 +169,13 @@ class BugReportApp(QWidget):
     QTimeEdit {
         background-color: #333333;
         border: 1px solid #555555;
-        padding: 5px;
-        border-radius: 5px;
+        /*padding: 5px;*/
+        /*border-radius: 5px;*/
         font-family: 'Malgun Gothic', sans-serif;
     }
 """)
-        #self.settings = QSettings('settings.json', QSettings.NativeFormat)
-        #self.settings_file = 'settings.json'
+        
 
-        layout = QVBoxLayout()
 
 
         # Priority Dropdown
@@ -190,11 +278,13 @@ class BugReportApp(QWidget):
 
         # Steps QTextEdit
         self.steps = QTextEdit()
+        self.steps.setAcceptRichText(False)
         layout.addWidget(QLabel('Steps'))
         layout.addWidget(self.steps)
 
         # Description QTextEdit
         self.description = QTextEdit()
+        self.description.setAcceptRichText(False)
         layout.addWidget(QLabel('Description'))
         layout.addWidget(self.description)
 
@@ -353,6 +443,20 @@ class BugReportApp(QWidget):
         #self.zip_folder(self.input_box2.text(),self.combo_box.currentText(),'WindowsServer')
         pass
 
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = True
+            self.oldPos = event.globalPos()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.LeftButton and self.dragging:
+            delta = QPoint(event.globalPos() - self.oldPos)
+            self.move(self.x() + delta.x(), self.y() + delta.y())
+            self.oldPos = event.globalPos()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = False
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
