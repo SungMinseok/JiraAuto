@@ -1,10 +1,12 @@
 import os
 import sys
 import json
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-                             QLineEdit, QTextEdit, QComboBox, QPushButton,QMessageBox)
-from PyQt5.QtCore import QSettings, Qt, QPoint
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QAction, QDialog,
+                             QLineEdit, QTextEdit, QComboBox, QPushButton,QMessageBox, QMenuBar)
+from PyQt5.QtCore import QSettings, Qt, QPoint,QUrl
+from PyQt5.QtGui import QIcon, QDesktopServices
 import threading
+from datetime import datetime, timedelta
 # import jira2 모듈 (jira2 모듈을 설치하고 사용할 수 있는지 확인 필요)
 import jira2
 
@@ -20,6 +22,7 @@ class BugReportApp(QWidget):
 
     def initUI(self):
         #self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
+        self.setWindowIcon(QIcon('jira_bug.ico'))
         layout = QVBoxLayout()
         # 커스텀 제목 표시줄
         # self.titleBar = QWidget(self)
@@ -34,13 +37,21 @@ class BugReportApp(QWidget):
         #     }
         # """)
 
-        titleBarLayout = QHBoxLayout()
-        self.titleLabel = QLabel("Jira ttalkkag2")
-        self.minimizeButton = QPushButton("_")
-        self.minimizeButton.setFixedSize(30,30)
-        #self.maximizeButton = QPushButton("[]")
-        self.closeButton = QPushButton("X")
-        self.closeButton.setFixedSize(30,30)
+        menu_bar = QMenuBar(self)
+        about_menu = menu_bar.addMenu("메뉴")
+        about_action = QAction("About", self)
+        about_action.triggered.connect(self.show_about_dialog)
+        about_action1 = QAction("Report Bugs", self)
+        about_action1.triggered.connect(lambda event: QDesktopServices.openUrl(QUrl("https://github.com/SungMinseok/JiraAuto/issues")))
+        about_menu.addActions([about_action,about_action1])
+
+        # titleBarLayout = QHBoxLayout()
+        # self.titleLabel = QLabel("Jira ttalkkag2")
+        # self.minimizeButton = QPushButton("_")
+        # self.minimizeButton.setFixedSize(30,30)
+        # #self.maximizeButton = QPushButton("[]")
+        # self.closeButton = QPushButton("X")
+        # self.closeButton.setFixedSize(30,30)
         # 버튼 스타일 적용
         buttonStyle = """
             QPushButton {
@@ -52,21 +63,22 @@ class BugReportApp(QWidget):
                 font-family: 'Malgun Gothic', sans-serif;
             }
         """
-        self.minimizeButton.setStyleSheet(buttonStyle)
+        #self.minimizeButton.setStyleSheet(buttonStyle)
         #self.maximizeButton.setStyleSheet(buttonStyle)
-        self.closeButton.setStyleSheet(buttonStyle)
+        #self.closeButton.setStyleSheet(buttonStyle)
 
-        titleBarLayout.addWidget(self.titleLabel)
-        titleBarLayout.addStretch()
-        titleBarLayout.addWidget(self.minimizeButton)
-        #titleBarLayout.addWidget(self.maximizeButton)
-        titleBarLayout.addWidget(self.closeButton)
+        # titleBarLayout.addWidget(self.titleLabel)
+        # titleBarLayout.addStretch()
+        # titleBarLayout.addWidget(self.minimizeButton)
+        # #titleBarLayout.addWidget(self.maximizeButton)
+        # titleBarLayout.addWidget(self.closeButton)
         #self.titleBar.setLayout(titleBarLayout)
 
         # 메인 레이아웃
         self.mainLayout = QVBoxLayout()
         #self.mainLayout.addWidget(self.titleBar)
         self.mainLayout.addStretch()
+        layout.setMenuBar(menu_bar)
 
         layout.addLayout(self.mainLayout)
         #self.setLayout(self.mainLayout)
@@ -92,9 +104,9 @@ class BugReportApp(QWidget):
         self.setMinimumSize(400, 300)
 
         # 버튼 기능 연결
-        self.minimizeButton.clicked.connect(self.showMinimized)
+        #self.minimizeButton.clicked.connect(self.showMinimized)
         # self.maximizeButton.clicked.connect(self.toggleMaximized)
-        self.closeButton.clicked.connect(self.closeEvent)
+        #self.closeButton.clicked.connect(self.closeEvent)
 
         self.isMaximized = False
 
@@ -457,6 +469,63 @@ class BugReportApp(QWidget):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.dragging = False
+
+
+    def get_most_recent_file(self):
+        # Get a list of all files in the current directory
+        #files = [f for f in os.listdir('.') if os.path.isfile(f)]
+        files = [f for f in os.listdir('.') if os.path.isfile(f) and not f.endswith('.json')]
+        # Initialize variables to track the most recent file and its modification time
+        most_recent_file = None
+        most_recent_time = 0
+        
+        for file in files:
+            # Get the last modification time
+            mod_time = os.path.getmtime(file)
+            
+            # Check if this file is the most recent one we've encountered
+            if mod_time > most_recent_time:
+                most_recent_time = mod_time
+                most_recent_file = file
+        
+        if most_recent_file:
+            # Convert the most recent time to a readable format
+            most_recent_time_readable = datetime.fromtimestamp(most_recent_time).strftime('%Y-%m-%d %H:%M:%S')
+            return most_recent_file, most_recent_time_readable
+        else:
+            return None, None
+
+    def show_about_dialog(self):
+        about_dialog = QDialog(self)
+        about_dialog.setWindowTitle("About")
+        layout = QVBoxLayout()
+        recent_file_name, recent_moditime = self.get_most_recent_file()
+
+        version_label = QLabel("Version: v1.0", about_dialog)
+        last_update_label = QLabel(f"Last update date: {recent_moditime}", about_dialog)
+        created_by_label = QLabel("Created by: mssung@pubg.com", about_dialog)
+        first_production_date_label = QLabel("First production date: 2024-07-01", about_dialog)
+
+        #github_label = QLabel("GitHub link:", about_dialog)
+        #github_icon = QLabel("Issues", about_dialog)
+        #pixmap = QPixmap("github_icon.png")  # Replace with the path to your GitHub icon
+        #github_icon.setPixmap(pixmap.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        #github_icon.setCursor(Qt.PointingHandCursor)
+        #github_icon.mousePressEvent = lambda event: QDesktopServices.openUrl(QUrl("https://github.com/SungMinseok/GetBuild/issues"))
+
+        layout.addWidget(version_label)
+        layout.addWidget(last_update_label)
+        layout.addWidget(created_by_label)
+        layout.addWidget(first_production_date_label)
+
+        h_layout = QHBoxLayout()
+        h_layout.addWidget(QPushButton())
+        h_layout.addWidget(QPushButton())
+        layout.addLayout(h_layout)
+
+        about_dialog.setLayout(layout)
+        about_dialog.exec_()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
