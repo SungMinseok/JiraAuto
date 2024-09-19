@@ -334,7 +334,8 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('되지 않은 현상', '되어야 합니다.')
         result_text = result_text.replace('없는 현상', '있어야 합니다.')
         result_text = result_text.replace('있는 현상', '있지 않아야 합니다.')
-        result_text = result_text.replace('지는 현상', '지지 않아야 합니다.')
+        result_text = result_text.replace('지는 현상', '지지 않아야 합니다.')# 
+        result_text = result_text.replace('크래쉬 발생', '크래쉬가 발생하지 않아야 합니다.')
 
         after_desc = f'*Observed(관찰 결과):*\n\n\
  * {main_text}을 확인합니다.\n\n\
