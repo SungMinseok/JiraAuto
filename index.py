@@ -191,9 +191,12 @@ class BugReportApp(QWidget):
 
 
         # Priority Dropdown
-        preset_layout = QHBoxLayout()
-        self.preset = QComboBox()
         layout.addWidget(QLabel('Preset'))
+        preset_layout = QHBoxLayout()
+        self.preset_prefix = QComboBox()
+        self.preset_prefix.setFixedWidth(105)
+        preset_layout.addWidget(self.preset_prefix)
+        self.preset = QComboBox()
         #layout.addWidget(self.preset)
         preset_layout.addWidget(self.preset)
 
