@@ -339,6 +339,7 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('있는 현상', '있지 않아야 합니다.')
         result_text = result_text.replace('지는 현상', '지지 않아야 합니다.')# 
         result_text = result_text.replace('크래쉬 발생', '크래쉬가 발생하지 않아야 합니다.')
+        result_text = result_text.replace('열리는 현상', '열리지 않아야 합니다.')#240923
 
         after_desc = f'*Observed(관찰 결과):*\n\n\
  * {main_text}을 확인합니다.\n\n\
@@ -412,13 +413,56 @@ class BugReportApp(QWidget):
 
     def refreshPresets(self):
         self.preset.clear()
-        dir_preset = 'preset'  # 디렉토리 경로 설정
+        self.preset_prefix.clear()  # Clear existing items
+        dir_preset = 'preset'  # Directory path
         preset_files = [f for f in os.listdir(dir_preset) if f.endswith('.json')]
-        preset_files.sort(key=lambda f: os.path.getmtime(os.path.join(dir_preset, f)), reverse=True)
-        self.preset.addItems(preset_files)
+        
+        # Create a set to store unique prefixes
+        prefixes = set()
+
+        # Dictionary to store files associated with each prefix
+        prefix_to_files = {}
+
+        for filename in preset_files:
+            # Split the filename into prefix and the rest using '_'
+            parts = filename.split('_')
+            if len(parts) > 1:
+                prefix = parts[0]  # Use the part before the first '_'
+            else:
+                prefix = parts[0].replace('.json', '')  # If no '_', use the whole name
+
+            # Add the prefix to the set
+            prefixes.add(prefix)
+
+            # Add files to the dictionary
+            if prefix not in prefix_to_files:
+                prefix_to_files[prefix] = []
+            prefix_to_files[prefix].append(filename)
+
+
+        # Add a slot to handle changes in preset_prefix selection
+        def on_preset_prefix_changed():
+            current_prefix = self.preset_prefix.currentText()
+            self.preset.clear()
+            # Filter preset files based on the selected prefix
+            if current_prefix in prefix_to_files:
+                self.preset.addItems(prefix_to_files[current_prefix])
+
+        # Add sorted prefixes to preset_prefix combobox
+        self.preset_prefix.addItems(sorted(prefixes))
+        on_preset_prefix_changed()
+        # Connect the function to preset_prefix changes
+        self.preset_prefix.currentIndexChanged.connect(on_preset_prefix_changed)
+
+        # Trigger the function to update preset for the default selection
+        if self.preset_prefix.count() > 0:
+            self.preset_prefix.setCurrentIndex(0)
+
 
     def applyPreset(self):
         selected_preset = self.preset.currentText()
+        self.add_preset_line.setText(selected_preset)
+
         if selected_preset:
             self.loadSettings(selected_preset)
     def savePreset(self):
@@ -459,20 +503,20 @@ class BugReportApp(QWidget):
         #self.zip_folder(self.input_box2.text(),self.combo_box.currentText(),'WindowsServer')
         pass
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.dragging = True
-            self.oldPos = event.globalPos()
+    # def mousePressEvent(self, event):
+    #     if event.button() == Qt.LeftButton:
+    #         self.dragging = True
+    #         self.oldPos = event.globalPos()
 
-    def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton and self.dragging:
-            delta = QPoint(event.globalPos() - self.oldPos)
-            self.move(self.x() + delta.x(), self.y() + delta.y())
-            self.oldPos = event.globalPos()
+    # def mouseMoveEvent(self, event):
+    #     if event.buttons() == Qt.LeftButton and self.dragging:
+    #         delta = QPoint(event.globalPos() - self.oldPos)
+    #         self.move(self.x() + delta.x(), self.y() + delta.y())
+    #         self.oldPos = event.globalPos()
 
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.dragging = False
+    # def mouseReleaseEvent(self, event):
+    #     if event.button() == Qt.LeftButton:
+    #         self.dragging = False
 
 
     def get_most_recent_file(self):
