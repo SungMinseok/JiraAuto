@@ -228,7 +228,7 @@ class BugReportApp(QWidget):
 
         # Other QLineEdits
         self.other_fields = {}
-        for field_name in ["summary", "reviewer", "branch", "build", "fixversion", "component", "label"]:
+        for field_name in ["summary", "linkedIssues", "issue", "reviewer", "branch", "build", "fixversion", "component", "label"]:
             self.other_fields[field_name] = QLineEdit()
             if field_name not in ["summary"] :
                 temp_layout = QHBoxLayout()
@@ -246,6 +246,14 @@ class BugReportApp(QWidget):
                     self.save_buildname_btn.setFixedWidth(25)
                     self.save_buildname_btn.clicked.connect(lambda : self.create_text_file('buildname.txt', self.other_fields["build"].text()))
                     temp_layout.addWidget(self.save_buildname_btn)
+                layout.addLayout(temp_layout)
+            elif field_name in ["summary"] :
+                layout.addWidget(QLabel(field_name))
+                temp_layout = QHBoxLayout()
+                self.sub_label = QLineEdit()
+                self.sub_label.setFixedWidth(80)
+                temp_layout.addWidget(self.sub_label)
+                temp_layout.addWidget(self.other_fields[field_name])
                 layout.addLayout(temp_layout)
             else:
                 layout.addWidget(QLabel(field_name))
@@ -309,12 +317,16 @@ class BugReportApp(QWidget):
         # layout.addWidget(self.save_btn)
 
         # Generate Button
+        generate_layout = QHBoxLayout()
+
         self.generate_option = QComboBox()
         self.generate_option.addItems(["기본값","크래쉬"])
         
         self.generate_btn = QPushButton('Auto Generate')
         self.generate_btn.clicked.connect(self.generate_description)
-        layout.addWidget(self.generate_btn)
+        generate_layout.addWidget(self.generate_option)
+        generate_layout.addWidget(self.generate_btn)
+        layout.addLayout(generate_layout)
 
         # Execute Button
         self.execute_btn = QPushButton('Execute')
@@ -341,6 +353,9 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('크래쉬 발생', '크래쉬가 발생하지 않아야 합니다.')
         result_text = result_text.replace('열리는 현상', '열리지 않아야 합니다.')#240923
         result_text = result_text.replace('가능한 현상', '불가해야 합니다.')#240925
+        
+        
+        result_text = result_text.replace('\n', '')#240925
 
         after_desc = f'*Observed(관찰 결과):*\n\n\
  * {main_text}을 확인합니다.\n\n\
@@ -355,6 +370,7 @@ class BugReportApp(QWidget):
 
     def saveSettings(self, filename=f'{dir_preset}/settings.json'):
         settings = {
+            'sub_label': self.sub_label.text(),
             'priority': self.priority.currentText(),
             'severity': self.severity.currentText(),
             'prevalence': self.prevalence.currentText(),
@@ -374,6 +390,7 @@ class BugReportApp(QWidget):
             with open(f'{dir_preset}/{filename}', 'r') as file:
                 settings = json.load(file)
 
+            self.sub_label.setText(settings.get('sub_label', ''))
             self.priority.setCurrentText(settings.get('priority', 'Blocker'))
             self.severity.setCurrentText(settings.get('severity', '1 - Critical'))
             self.prevalence.setCurrentText(settings.get('prevalence', '1 - All users'))
@@ -389,13 +406,16 @@ class BugReportApp(QWidget):
     def execute(self):
         self.savePreset()
 
+        linkedIssues = self.other_fields['linkedIssues'].text()
+        issue = self.other_fields['issue'].text()
         reviewer = self.other_fields['reviewer'].text()
         branch = self.other_fields['branch'].text()
         build = self.other_fields['build'].text()
         fixversion = self.other_fields['fixversion'].text()
         component = self.other_fields['component'].text()
         label = self.other_fields['label'].text()
-        summary = f'[{label}] {self.other_fields['summary'].text()}'
+        sub_label = self.sub_label.text()
+        summary = f'[{label}] {self.other_fields['summary'].text()}' if sub_label == "" else f'[{label}][{sub_label}] {self.other_fields['summary'].text()}'
         priority = self.priority.currentText()
         severity = self.severity.currentText()
         prevalence = self.prevalence.currentText()
@@ -404,7 +424,7 @@ class BugReportApp(QWidget):
         description = self.description.toPlainText()
 
         def thread_function():
-            jira2.create_issue(summary, reviewer, branch, build, fixversion, component, label, priority, severity, prevalence, repro_rate, steps, description)
+            jira2.create_issue(summary, linkedIssues, issue, reviewer, branch, build, fixversion, component, label, priority, severity, prevalence, repro_rate, steps, description)
 
         # 스레드 생성 및 시작
         issue_thread = threading.Thread(target=thread_function)
@@ -583,3 +603,18 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = BugReportApp()
     sys.exit(app.exec_())
+
+
+# *Note(참고):*
+#  * UEMinidump.dmp : 
+# | |
+#  * pdb path : \\pubg-pds\PBB\Builds\CompileBuild_DEV_game_SEL137795_r176663\WindowsServer\Game\Binaries\Win64
+#  ** (Sharepoint) : 
+#  * 
+# {code:java}
+
+# {code}
+#  * 
+# {code:java}
+
+# {code}
