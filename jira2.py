@@ -50,7 +50,7 @@ def start_driver():
     return driver
 
 
-def create_issue(summary, reviewer, branch, build, fixversion, component, label, priority, severity, prevalence, repro_rate, steps, description):
+def create_issue(summary, linkedIssues, issue, reviewer, branch, build, fixversion, component, label, priority, severity, prevalence, repro_rate, steps, description):
     driver = start_driver()
 
     driver.implicitly_wait(10)
@@ -62,9 +62,15 @@ def create_issue(summary, reviewer, branch, build, fixversion, component, label,
     driver.find_element(By.XPATH,'//*[@id="assign-to-me-trigger"]').click()
     driver.implicitly_wait(1)
     driver.find_element(By.XPATH,'//*[@id="customfield_14311-field"]').send_keys(reviewer)
-    time.sleep(1)
+    #driver.implicitly_wait(1)
+    time.sleep(0.5)
     driver.find_element(By.XPATH,'//*[@id="customfield_14311-field"]').send_keys(Keys.RETURN)
-    driver.find_element(By.XPATH,'//*[@id="issuelinks-linktype"]').send_keys('bug')
+    driver.implicitly_wait(1)
+    driver.find_element(By.XPATH,'//*[@id="issuelinks-linktype"]').send_keys(linkedIssues)
+    driver.find_element(By.XPATH,'//*[@id="issuelinks-issues-textarea"]').send_keys(issue)
+    time.sleep(0.5)
+
+    driver.find_element(By.XPATH,'//*[@id="issuelinks-issues-textarea"]').send_keys(Keys.RETURN)
     #driver.find_element(By.XPATH,'//*[@id="issuelinks-linktype"]').send_keys(Keys.RETURN)
     driver.find_element(By.XPATH,'//*[@id="customfield_19300-textarea"]').send_keys(branch)
     driver.find_element(By.XPATH,'//*[@id="customfield_14805-textarea"]').send_keys(build)
