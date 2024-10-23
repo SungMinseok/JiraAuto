@@ -67,10 +67,12 @@ def create_issue(summary, linkedIssues, issue, reviewer, branch, build, fixversi
     driver.find_element(By.XPATH,'//*[@id="customfield_14311-field"]').send_keys(Keys.RETURN)
     driver.implicitly_wait(1)
     driver.find_element(By.XPATH,'//*[@id="issuelinks-linktype"]').send_keys(linkedIssues)
-    driver.find_element(By.XPATH,'//*[@id="issuelinks-issues-textarea"]').send_keys(issue)
-    time.sleep(0.5)
 
-    driver.find_element(By.XPATH,'//*[@id="issuelinks-issues-textarea"]').send_keys(Keys.RETURN)
+    if issue != "":
+        driver.find_element(By.XPATH,'//*[@id="issuelinks-issues-textarea"]').send_keys(issue)
+        time.sleep(0.5)
+
+        driver.find_element(By.XPATH,'//*[@id="issuelinks-issues-textarea"]').send_keys(Keys.RETURN)
     #driver.find_element(By.XPATH,'//*[@id="issuelinks-linktype"]').send_keys(Keys.RETURN)
     driver.find_element(By.XPATH,'//*[@id="customfield_19300-textarea"]').send_keys(branch)
     driver.find_element(By.XPATH,'//*[@id="customfield_14805-textarea"]').send_keys(build)
