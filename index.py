@@ -340,6 +340,7 @@ class BugReportApp(QWidget):
 
     def generate_description(self):
         main_text = self.other_fields['summary'].text()
+        option = self.generate_option.currentText()
 
         result_text = main_text.replace('다른 현상', '동일해야 합니다.')
         result_text = result_text.replace('하지 않는 현상', '해야 합니다.')
@@ -353,18 +354,37 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('크래쉬 발생', '크래쉬가 발생하지 않아야 합니다.')
         result_text = result_text.replace('열리는 현상', '열리지 않아야 합니다.')#240923
         result_text = result_text.replace('가능한 현상', '불가해야 합니다.')#240925
+        result_text = result_text.replace('진 현상', '지지않아야 합니다.')#241014
+        result_text = result_text.replace('일부', '모든')#241021
         
         
         result_text = result_text.replace('\n', '')#240925
 
-        after_desc = f'*Observed(관찰 결과):*\n\n\
- * {main_text}을 확인합니다.\n\n\
-*Video(영상):*\n\n\
- * 영상을 첨부 중입니다.\n\n\
-*Expected(기대 결과):*\n\n\
- * {result_text}\n\n\
-*Note(참고):*\n\n\
- * 참고사항을 작성 중입니다.'
+        if option == "서버크래쉬" :
+            after_desc = f'*Observed(관찰 결과):*\n\n\
+    * {main_text}을 확인합니다.\n\n\
+    *Expected(기대 결과):*\n\n\
+    * {result_text}\n\n\
+    *Note(참고):*\n\n\
+    * 참고사항을 작성 중입니다.'
+        elif option == "서버크래쉬" :
+            after_desc = f'*Observed(관찰 결과):*\n\n\
+    * {main_text}을 확인합니다.\n\n\
+    *Expected(기대 결과):*\n\n\
+    * {result_text}\n\n\
+    *Note(참고):*\n\n\
+    * 참고사항을 작성 중입니다.'
+        else:
+
+            after_desc = f'*Observed(관찰 결과):*\n\n\
+    * {main_text}을 확인합니다.\n\n\
+    *Video(영상):*\n\n\
+    * 영상을 첨부 중입니다.\n\n\
+    *Expected(기대 결과):*\n\n\
+    * {result_text}\n\n\
+    *Note(참고):*\n\n\
+     * 작성 중입니다.'
+            
         self.description.setText(after_desc)
 
 
