@@ -228,7 +228,7 @@ class BugReportApp(QWidget):
 
         # Other QLineEdits
         self.other_fields = {}
-        for field_name in ["summary", "linkedIssues", "issue", "reviewer", "branch", "build", "fixversion", "component", "label"]:
+        for field_name in ["summary", "linkedIssues", "issue", "assignee", "reviewer", "branch", "build", "fixversion", "component", "label"]:
             self.other_fields[field_name] = QLineEdit()
             if field_name not in ["summary"] :
                 temp_layout = QHBoxLayout()
