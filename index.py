@@ -236,8 +236,7 @@ class BugReportApp(QWidget):
                 temp_label.setFixedWidth(80)
                 temp_layout.addWidget(temp_label)
                 temp_layout.addWidget(self.other_fields[field_name])
-                if field_name in ["build"] :
-                                
+                if field_name in ["build"] :                                
                     self.load_buildname_btn = QPushButton('🔄')
                     self.load_buildname_btn.setFixedWidth(25)
                     self.load_buildname_btn.clicked.connect(lambda: self.load_text_file_all('buildname.txt', self.other_fields["build"]))
@@ -320,7 +319,7 @@ class BugReportApp(QWidget):
         generate_layout = QHBoxLayout()
 
         self.generate_option = QComboBox()
-        self.generate_option.addItems(["기본값","크래쉬"])
+        self.generate_option.addItems(["기본값","클라크래쉬","서버크래쉬"])
         
         self.generate_btn = QPushButton('Auto Generate')
         self.generate_btn.clicked.connect(self.generate_description)
@@ -341,6 +340,7 @@ class BugReportApp(QWidget):
     def generate_description(self):
         main_text = self.other_fields['summary'].text()
         option = self.generate_option.currentText()
+        build_text = self.other_fields['build'].text()
 
         result_text = main_text.replace('다른 현상', '동일해야 합니다.')
         result_text = result_text.replace('하지 않는 현상', '해야 합니다.')
@@ -356,26 +356,41 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('가능한 현상', '불가해야 합니다.')#240925
         result_text = result_text.replace('진 현상', '지지않아야 합니다.')#241014
         result_text = result_text.replace('일부', '모든')#241021
+        result_text = result_text.replace('가리는 현상', '가리지 않아야 합니다.')#241021
         
         
         result_text = result_text.replace('\n', '')#240925
 
-        if option == "서버크래쉬" :
+        if option == "클라크래쉬" :
             after_desc = f'*Observed(관찰 결과):*\n\n\
     * {main_text}을 확인합니다.\n\n\
     *Expected(기대 결과):*\n\n\
     * {result_text}\n\n\
     *Note(참고):*\n\n\
-    * 참고사항을 작성 중입니다.'
-        elif option == "서버크래쉬" :
-            after_desc = f'*Observed(관찰 결과):*\n\n\
-    * {main_text}을 확인합니다.\n\n\
-    *Expected(기대 결과):*\n\n\
-    * {result_text}\n\n\
-    *Note(참고):*\n\n\
-    * 참고사항을 작성 중입니다.'
+     * pdb path: \\pubg-pds\PBB\Builds\{build_text}\WindowsClient\Game\Binaries\Win64\n\
+ * ErrorMessage:\
+{{code:java}}\
+{{code}}\n\n\
+\
+ * CallStack:\
+{{code:java}}\
+{{code}}'
+#         elif option == "서버크래쉬" :
+#             after_desc = f'*Observed(관찰 결과):*\n\n\
+#     * {main_text}을 확인합니다.\n\n\
+#     *Expected(기대 결과):*\n\n\
+#     * {result_text}\n\n\
+#     *Note(참고):*\n\n\     
+#     * pdb path: \\pubg-pds\PBB\Builds\{build_text}\WindowsServer\Game\Binaries\Win64\n\
+#  * ErrorMessage:\
+# {{code:java}}\
+# {{code}}\n\n\
+# \
+#  * CallStack:\
+# {{code:java}}\
+# {{code}}'
+        
         else:
-
             after_desc = f'*Observed(관찰 결과):*\n\n\
     * {main_text}을 확인합니다.\n\n\
     *Video(영상):*\n\n\
