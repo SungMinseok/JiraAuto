@@ -100,7 +100,7 @@ def create_issue(summary, linkedIssues, issue, reviewer, branch, build, fixversi
     driver.find_element(By.XPATH,'//*[@id="description-wiki-edit"]/nav/div/div/ul/li[2]/button').click()
     driver.implicitly_wait(2)
     driver.find_element(By.XPATH,'//*[@id="description"]').send_keys(description)
-    driver.implicitly_wait(2)
-    driver.find_element(By.XPATH,'//*[@id="description-wiki-edit"]/nav/div/div/ul/li[1]/button').click()
+    #driver.implicitly_wait(2)
+    #driver.find_element(By.XPATH,'//*[@id="description-wiki-edit"]/nav/div/div/ul/li[1]/button').click()
 
     os.system("pause")
