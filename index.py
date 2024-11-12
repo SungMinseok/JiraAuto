@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QAction, QDialog,
-                             QLineEdit, QTextEdit, QComboBox, QPushButton,QMessageBox, QMenuBar)
+                             QLineEdit, QTextEdit, QComboBox, QPushButton,QMessageBox, QMenuBar, QCheckBox)
 from PyQt5.QtCore import QSettings, Qt, QPoint,QUrl
 from PyQt5.QtGui import QIcon, QDesktopServices
 import threading
@@ -245,6 +245,10 @@ class BugReportApp(QWidget):
                     self.save_buildname_btn.setFixedWidth(25)
                     self.save_buildname_btn.clicked.connect(lambda : self.create_text_file('buildname.txt', self.other_fields["build"].text()))
                     temp_layout.addWidget(self.save_buildname_btn)
+                elif field_name in ["label"] :                                
+                    self.include_main_label_check_box = QCheckBox('Include')
+                    self.include_main_label_check_box.setFixedWidth(75)
+                    temp_layout.addWidget(self.include_main_label_check_box)
                 layout.addLayout(temp_layout)
             elif field_name in ["summary"] :
                 layout.addWidget(QLabel(field_name))
@@ -362,18 +366,18 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('\n', '')#240925
 
         if option == "클라크래쉬" :
-            after_desc = f'*Observed(관찰 결과):*\n\n\
+            after_desc = fr'*Observed(관찰 결과):*\n\n\
     * {main_text}을 확인합니다.\n\n\
     *Expected(기대 결과):*\n\n\
     * {result_text}\n\n\
     *Note(참고):*\n\n\
      * pdb path: \\pubg-pds\PBB\Builds\{build_text}\WindowsClient\Game\Binaries\Win64\n\
- * ErrorMessage:\
-{{code:java}}\
+ * ErrorMessage:\n\
+{{code:java}}\n\
 {{code}}\n\n\
 \
- * CallStack:\
-{{code:java}}\
+ * CallStack:\n\
+{{code:java}}\n\
 {{code}}'
 #         elif option == "서버크래쉬" :
 #             after_desc = f'*Observed(관찰 결과):*\n\n\
@@ -450,7 +454,16 @@ class BugReportApp(QWidget):
         component = self.other_fields['component'].text()
         label = self.other_fields['label'].text()
         sub_label = self.sub_label.text()
-        summary = f'[{label}] {self.other_fields['summary'].text()}' if sub_label == "" else f'[{label}][{sub_label}] {self.other_fields['summary'].text()}'
+
+        final_label = ""
+        if sub_label != "":
+            final_label = f'[{label}][{sub_label}] '
+            if not self.include_main_label_check_box.isChecked() :
+                final_label = f'[{sub_label}] '
+        else :
+            final_label = f'[{label}] '#include 체크박스가 체크되있지 않더라도, sub라벨이 없으면 강제 삽입
+
+        summary = f'{final_label}{self.other_fields['summary'].text()}'
         priority = self.priority.currentText()
         severity = self.severity.currentText()
         prevalence = self.prevalence.currentText()
