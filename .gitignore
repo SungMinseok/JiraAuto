@@ -8,3 +8,5 @@
 buildname.txt
 test
 *driver.exe
+/build
+/dist
