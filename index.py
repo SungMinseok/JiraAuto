@@ -361,24 +361,30 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('진 현상', '지지않아야 합니다.')#241014
         result_text = result_text.replace('일부', '모든')#241021
         result_text = result_text.replace('가리는 현상', '가리지 않아야 합니다.')#241021
+        result_text = result_text.replace('불가한 현상', '가능해야 합니다.')#241119
         
         
         result_text = result_text.replace('\n', '')#240925
 
-        if option == "클라크래쉬" :
-            after_desc = fr'*Observed(관찰 결과):*\n\n\
-    * {main_text}을 확인합니다.\n\n\
-    *Expected(기대 결과):*\n\n\
-    * {result_text}\n\n\
-    *Note(참고):*\n\n\
-     * pdb path: \\pubg-pds\PBB\Builds\{build_text}\WindowsClient\Game\Binaries\Win64\n\
- * ErrorMessage:\n\
-{{code:java}}\n\
-{{code}}\n\n\
-\
- * CallStack:\n\
-{{code:java}}\n\
-{{code}}'
+        if option == "클라크래쉬":
+            after_desc = fr'''*Observed(관찰 결과):*
+
+            * {main_text}을 확인합니다.
+
+            *Expected(기대 결과):*
+
+            * {result_text}
+
+            *Note(참고):*
+
+            * pdb path: \\pubg-pds\\PBB\\Builds\\{build_text}\\WindowsClient\\Game\\Binaries\\Win64
+            * ErrorMessage:
+            {{code:java}}
+            {{code}}
+
+            * CallStack:
+            {{code:java}}
+            {{code}}'''
 #         elif option == "서버크래쉬" :
 #             after_desc = f'*Observed(관찰 결과):*\n\n\
 #     * {main_text}을 확인합니다.\n\n\
