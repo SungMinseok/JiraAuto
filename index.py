@@ -201,6 +201,11 @@ class BugReportApp(QWidget):
         preset_layout.addWidget(self.preset)
 
         # Refresh and Apply Preset Buttons
+        self.delete_preset_btn = QPushButton('❌')
+        self.delete_preset_btn.setFixedWidth(25)
+        self.delete_preset_btn.clicked.connect(self.deletePreset)
+        preset_layout.addWidget(self.delete_preset_btn)
+
         self.refresh_preset_btn = QPushButton('🔄')
         self.refresh_preset_btn.setFixedWidth(25)
         self.refresh_preset_btn.clicked.connect(self.refreshPresets)
@@ -377,6 +382,7 @@ class BugReportApp(QWidget):
 
             *Note(참고):*
 
+            * call stack : 
             * pdb path: \\pubg-pds\\PBB\\Builds\\{build_text}\\WindowsClient\\Game\\Binaries\\Win64
             * ErrorMessage:
             {{code:java}}
@@ -542,6 +548,7 @@ class BugReportApp(QWidget):
 
         if selected_preset:
             self.loadSettings(selected_preset)
+
     def savePreset(self):
         new_preset = self.add_preset_line.text()
         if new_preset:
@@ -550,7 +557,27 @@ class BugReportApp(QWidget):
             self.saveSettings(new_preset)
             print(f'saved preset successefully, : {new_preset}.json')
 
-    
+    def deletePreset(self):
+        current_preset = self.preset.currentText()
+        if not current_preset:
+            return
+
+        confirm_dialog = QMessageBox()
+        confirm_dialog.setIcon(QMessageBox.Warning)
+        confirm_dialog.setText(f"Are you sure you want to delete the preset '{current_preset}'?")
+        confirm_dialog.setWindowTitle("Confirm Deletion")
+        confirm_dialog.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+        result = confirm_dialog.exec_()
+
+        if result == QMessageBox.Ok:
+            file_path = os.path.join(dir_preset, f"{current_preset}")
+            try:
+                os.remove(file_path)
+                self.refreshPresets()
+                QMessageBox.information(self, "Success", f"Preset '{current_preset}' has been deleted.")
+            except OSError as e:
+                QMessageBox.critical(self, "Error", f"Failed to delete preset: {str(e)}")
 
     def create_text_file(self, filename, content):
         with open(filename, 'w') as file:
