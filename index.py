@@ -101,7 +101,7 @@ class BugReportApp(QWidget):
         #     }
         # """)
 
-        self.setMinimumSize(400, 300)
+        self.setMinimumSize(500, 300)
 
         # 버튼 기능 연결
         #self.minimizeButton.clicked.connect(self.showMinimized)
@@ -192,9 +192,10 @@ class BugReportApp(QWidget):
 
         # Priority Dropdown
         layout.addWidget(QLabel('Preset'))
+        
         preset_layout = QHBoxLayout()
         self.preset_prefix = QComboBox()
-        self.preset_prefix.setFixedWidth(105)
+        self.preset_prefix.setFixedWidth(150)
         preset_layout.addWidget(self.preset_prefix)
         self.preset = QComboBox()
         #layout.addWidget(self.preset)
@@ -209,12 +210,14 @@ class BugReportApp(QWidget):
         self.refresh_preset_btn = QPushButton('🔄')
         self.refresh_preset_btn.setFixedWidth(25)
         self.refresh_preset_btn.clicked.connect(self.refreshPresets)
+        self.refresh_preset_btn.setShortcut('F5')  # F5 키를 단축키로 설정
         preset_layout.addWidget(self.refresh_preset_btn)
 
         self.apply_preset_btn = QPushButton('✅')
         self.apply_preset_btn.setToolTip('프리셋 적용')
         self.apply_preset_btn.setFixedWidth(25)
         self.apply_preset_btn.clicked.connect(self.applyPreset)
+        self.apply_preset_btn.setShortcut('F6')  # F6 키를 단축키로 설정
         preset_layout.addWidget(self.apply_preset_btn)
 
         layout.addLayout(preset_layout)
@@ -233,7 +236,7 @@ class BugReportApp(QWidget):
 
         # Other QLineEdits
         self.other_fields = {}
-        for field_name in ["summary", "linkedIssues", "issue", "assignee", "reviewer", "branch", "build", "fixversion", "component", "label"]:
+        for field_name in ["summary", "team", "linkedIssues", "issue", "parent", "assignee", "reviewer", "branch", "build", "fixversion", "component", "label"]:
             self.other_fields[field_name] = QLineEdit()
             if field_name not in ["summary"] :
                 temp_layout = QHBoxLayout()
@@ -250,10 +253,22 @@ class BugReportApp(QWidget):
                     self.save_buildname_btn.setFixedWidth(25)
                     self.save_buildname_btn.clicked.connect(lambda : self.create_text_file('buildname.txt', self.other_fields["build"].text()))
                     temp_layout.addWidget(self.save_buildname_btn)
+                if field_name in ["fixversion"] :                                
+                    self.load_buildname_btn = QPushButton('🔄')
+                    self.load_buildname_btn.setFixedWidth(25)
+                    self.load_buildname_btn.clicked.connect(lambda: self.load_text_file_all('fixversion.txt', self.other_fields["fixversion"]))
+                    temp_layout.addWidget(self.load_buildname_btn)
+                    self.save_buildname_btn = QPushButton('💾')
+                    self.save_buildname_btn.setFixedWidth(25)
+                    self.save_buildname_btn.clicked.connect(lambda : self.create_text_file('fixversion.txt', self.other_fields["fixversion"].text()))
+                    temp_layout.addWidget(self.save_buildname_btn)
                 elif field_name in ["label"] :                                
                     self.include_main_label_check_box = QCheckBox('Include')
                     self.include_main_label_check_box.setFixedWidth(75)
                     temp_layout.addWidget(self.include_main_label_check_box)
+                # else:
+                #     temp_layout.addWidget(self.other_fields[field_name])
+
                 layout.addLayout(temp_layout)
             elif field_name in ["summary"] :
                 layout.addWidget(QLabel(field_name))
@@ -337,8 +352,9 @@ class BugReportApp(QWidget):
         layout.addLayout(generate_layout)
 
         # Execute Button
-        self.execute_btn = QPushButton('Execute')
+        self.execute_btn = QPushButton('Execute (F2)')
         self.execute_btn.clicked.connect(self.execute)
+        self.execute_btn.setShortcut('F2')  # F2 키를 단축키로 설정
         layout.addWidget(self.execute_btn)
 
         self.setLayout(layout)
@@ -372,25 +388,30 @@ class BugReportApp(QWidget):
         result_text = result_text.replace('\n', '')#240925
 
         if option == "클라크래쉬":
-            after_desc = fr'''*Observed(관찰 결과):*
+            after_desc = (
+                f"**Observed:**\n"
+                f"* {main_text}을 확인합니다.\n\n"
+                f"**Sentry:**\n"
+                f"* 링크를 첨부 중입니다.\n\n"
+                f"**Expected (기대 결과):**\n"
+                f"* {result_text}\n\n"
+                f"**Callstack:**\n"
+                f"```\n\n"
+            )
+            # after_desc = fr'''*Observed(관찰 결과):*
+            # * {main_text}을 확인합니다.
+            # *Expected(기대 결과):*
+            # * {result_text}
+            # *Note(참고):*
+            # * call stack : 
+            # * pdb path: \\pubg-pds\\PBB\\Builds\\{build_text}\\WindowsClient\\Game\\Binaries\\Win64
+            # * ErrorMessage:
+            # {{code:java}}
+            # {{code}}
 
-            * {main_text}을 확인합니다.
-
-            *Expected(기대 결과):*
-
-            * {result_text}
-
-            *Note(참고):*
-
-            * call stack : 
-            * pdb path: \\pubg-pds\\PBB\\Builds\\{build_text}\\WindowsClient\\Game\\Binaries\\Win64
-            * ErrorMessage:
-            {{code:java}}
-            {{code}}
-
-            * CallStack:
-            {{code:java}}
-            {{code}}'''
+            # * CallStack:
+            # {{code:java}}
+            # {{code}}'''
 #         elif option == "서버크래쉬" :
 #             after_desc = f'*Observed(관찰 결과):*\n\n\
 #     * {main_text}을 확인합니다.\n\n\
@@ -406,15 +427,40 @@ class BugReportApp(QWidget):
 # {{code:java}}\
 # {{code}}'
         
+        elif option == "서버크래쉬":
+            after_desc = (
+                f"**Observed(관찰 결과):**\n"
+                f"* {main_text}을 확인합니다.\n\n"
+                f"**Video(영상):**\n"
+                f"* 영상을 첨부 중입니다.\n\n"
+                f"**Expected (기대 결과):**\n"
+                f"* {result_text}\n\n"
+                f"**Note(참고):**\n"
+                f"* 작성 중입니다."
+            )
+        
+        elif option == "빌드실패":
+            after_desc = (
+                f"**Observed(관찰 결과):**\n"
+                f"* {main_text}을 확인합니다.\n\n"
+                f"**Video(영상):**\n"
+                f"* 영상을 첨부 중입니다.\n\n"
+                f"**Expected (기대 결과):**\n"
+                f"* {result_text}\n\n"
+                f"**Note(참고):**\n"
+                f"* 작성 중입니다."
+            )
         else:
-            after_desc = f'*Observed(관찰 결과):*\n\n\
-    * {main_text}을 확인합니다.\n\n\
-    *Video(영상):*\n\n\
-    * 영상을 첨부 중입니다.\n\n\
-    *Expected(기대 결과):*\n\n\
-    * {result_text}\n\n\
-    *Note(참고):*\n\n\
-     * 작성 중입니다.'
+            after_desc = (
+                f"**Observed(관찰 결과):**\n"
+                f"* {main_text}을 확인합니다.\n\n"
+                f"**Video(영상):**\n"
+                f"* 영상을 첨부 중입니다.\n\n"
+                f"**Expected (기대 결과):**\n"
+                f"* {result_text}\n\n"
+                f"**Note(참고):**\n"
+                f"* 작성 중입니다."
+            )
             
         self.description.setText(after_desc)
 
@@ -457,8 +503,10 @@ class BugReportApp(QWidget):
     def execute(self):
         self.savePreset()
 
+        team = self.other_fields['team'].text()
         linkedIssues = self.other_fields['linkedIssues'].text()
         issue = self.other_fields['issue'].text()
+        parent = self.other_fields['linkedIssues'].text()
         reviewer = self.other_fields['reviewer'].text()
         branch = self.other_fields['branch'].text()
         build = self.other_fields['build'].text()
@@ -475,7 +523,7 @@ class BugReportApp(QWidget):
         else :
             final_label = f'[{label}] '#include 체크박스가 체크되있지 않더라도, sub라벨이 없으면 강제 삽입
 
-        summary = f'{final_label}{self.other_fields['summary'].text()}'
+        summary = f"{final_label}{self.other_fields['summary'].text()}"
         priority = self.priority.currentText()
         severity = self.severity.currentText()
         prevalence = self.prevalence.currentText()
@@ -484,7 +532,7 @@ class BugReportApp(QWidget):
         description = self.description.toPlainText()
 
         def thread_function():
-            jira2.create_issue(summary, linkedIssues, issue, reviewer, branch, build, fixversion, component, label, priority, severity, prevalence, repro_rate, steps, description)
+            jira2.create_issue(summary, linkedIssues, issue, parent, reviewer, branch, build, fixversion, component, label, priority, severity, prevalence, repro_rate, steps, description, team)
 
         # 스레드 생성 및 시작
         issue_thread = threading.Thread(target=thread_function)
@@ -585,10 +633,13 @@ class BugReportApp(QWidget):
         print(f"File '{filename}' created successfully.")
 
     def load_text_file_all(self, filename, target = None):
-        with open(filename, 'r') as file:
-            content = file.read()
-        if target != None :
-            target.setText(content)
+        try:
+            with open(filename, 'r') as file:
+                content = file.read()
+            if target != None :
+                target.setText(content)
+        except FileNotFoundError:
+            print(f"File '{filename}' not found.")
     
     def load_text_file_line_by_line(self, filename, target = None):
         with open(filename, 'r') as file:
