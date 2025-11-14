@@ -14,3 +14,16 @@ test
 *.spec
 *backup*
 *.txt
+venv
+result
+AI_IMPLEMENTATION_SUMMARY.md
+AI_SETUP_GUIDE.md
+AI_템플릿_적용_완료.md
+AI_템플릿_가이드.md
+AI기능_테스트.md
+최종_해결_요약.md
+최종_수정_완료.md
+JSON_파싱_오류_해결.md
+OLLAMA_설치가이드.md
+README_시작하기.md
+작업완료_요약.md
